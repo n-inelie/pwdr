@@ -41,3 +41,21 @@ pub fn Matrix(comptime T: type) type {
         }
     };
 }
+
+const MatrixError = error{
+    InvalidSize,
+    NotSquare,
+    OutOfMemory,
+};
+
+pub fn Add(comptime T: type, allocator: std.mem.Allocator, m1: Matrix(T), m2: Matrix(T)) MatrixError!Matrix(T) {
+    if ((m1.rows_n != m2.rows_n) or (m1.cols_n != m2.cols_n)) {
+        return MatrixError.InvalidSize;
+    }
+    var dest = Matrix(T).init(allocator, m1.rows_n, m1.cols_n) catch return MatrixError.OutOfMemory;
+    var i: usize = 0;
+    while (i < dest.getSize()) : (i += 1) {
+        dest.elements.items[i] = m1.elements.items[i] + m2.elements.items[i];
+    }
+    return dest;
+}

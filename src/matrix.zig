@@ -17,10 +17,11 @@ pub fn Matrix(comptime T: type) type {
         elements: []const T,
 
         pub fn Create(rows_n: usize, cols_n: usize) Self {
+            var elements_array = [_]T{0} ** 4;
             return Self{
                 .rows_n = rows_n,
                 .cols_n = cols_n,
-                .elements = &[rows_n * cols_n]T{0},
+                .elements = elements_array[0..],
             };
         }
 
@@ -28,13 +29,14 @@ pub fn Matrix(comptime T: type) type {
             return self.rows_n * self.cols_n;
         }
 
-        pub fn lazyPrint(self: Self) !void {
-            for (0..self.rows_n) |row_i| {
-                for (0..self.cols_n) |col_i| {
-                    print("{} ", .{try self.get(row_i, col_i)});
+        pub fn lazyPrint(self: Self) void {
+            for (self.elements, 1..) |element, i| {
+                print("{d:.1} ", .{element});
+                if (i % self.cols_n == 0) {
+                    print("\n", .{});
                 }
-                print("\n", .{});
             }
+            print("\n", .{});
         }
 
         pub fn makeScaler(self: *Self, x: T) !void {
@@ -91,7 +93,7 @@ pub fn Matrix(comptime T: type) type {
             if (col_i < 0 or col_i > self.cols_n - 1) {
                 return MatrixError.OutOfBounds;
             }
-            var col = &[self.rows_n]T{0};
+            var col = &[_]T{0} ** self.rows_n;
             for (0..self.rows_n) |row_i| {
                 col[row_i] = try self.get(row_i, col_i);
             }

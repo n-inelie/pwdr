@@ -1,4 +1,5 @@
 const std = @import("std");
+const print = std.debug.print;
 const math = std.math;
 
 pub fn Vector(comptime T: type) type {
@@ -13,6 +14,14 @@ pub fn Vector(comptime T: type) type {
                 .elements = args,
                 .dimensions = args.len,
             };
+        }
+
+        pub fn lazyPrint(self: Self) void {
+            print("< ", .{});
+            for (self.elements) |element| {
+                print("{d} ", .{element});
+            }
+            print(">\n", .{});
         }
 
         pub fn magnitudeSquared(self: Self) f32 {

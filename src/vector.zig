@@ -38,26 +38,14 @@ pub fn Vector(comptime T: type) type {
     };
 }
 
-pub inline fn Vector2i(x: i32, y: i32) Vector(i32) {
-    return Vector(f32).Create(&.{ x, y });
+pub inline fn Vector2(comptime T: type, x: T, y: T) Vector(T) {
+    return Vector(T).Create(&.{ x, y });
 }
 
-pub inline fn Vector3i(x: i32, y: i32, z: i32) Vector(i32) {
-    return Vector(i32).Create(&.{ x, y, z });
+pub inline fn Vector3(comptime T: type, x: T, y: T, z: T) Vector(T) {
+    return Vector(T).Create(&.{ x, y, z });
 }
 
-pub inline fn Vector4i(x: i32, y: i32, z: i32, w: i32) Vector(i32) {
-    return Vector(i32).Create(&.{ x, y, z, w });
-}
-
-pub inline fn Vector2f(x: f32, y: f32) Vector(f32) {
-    return Vector(f32).Create(&.{ x, y });
-}
-
-pub inline fn Vector3f(x: f32, y: f32, z: f32) Vector(f32) {
-    return Vector(f32).Create(&.{ x, y, z });
-}
-
-pub inline fn Vector4f(x: f32, y: f32, z: f32, w: f32) Vector(f32) {
-    return Vector(f32).Create(&.{ x, y, z, w });
+pub inline fn Vector4(comptime T: type, x: T, y: T, z: T, w: T) Vector(T) {
+    return Vector(T).Create(&.{ x, y, z, w });
 }

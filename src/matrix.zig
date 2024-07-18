@@ -68,6 +68,12 @@ pub fn Matrix(comptime T: type) type {
             }
         }
 
+        pub fn scale(self: *Self, x: T) void {
+            for (0..self.getSize()) |i| {
+                self.elements.items[i] *= x;
+            }
+        }
+
         pub fn get(self: Self, row_i: usize, col_i: usize) MatrixError!T {
             if (row_i < 0 or col_i < 0 or row_i > self.rows_n - 1 or col_i > self.cols_n - 1) {
                 return MatrixError.OutOfBounds;

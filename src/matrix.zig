@@ -41,11 +41,8 @@ pub fn Matrix(comptime T: type) type {
         }
 
         pub fn lazyPrint(self: Self) !void {
-            var row_i: usize = 0;
-            var col_i: usize = 0;
-            while (row_i < self.rows_n) : (row_i += 1) {
-                col_i = 0;
-                while (col_i < self.cols_n) : (col_i += 1) {
+            for (0..self.rows_n) |row_i| {
+                for (0..self.cols_n) |col_i| {
                     print("{} ", .{try self.get(row_i, col_i)});
                 }
                 print("\n", .{});
@@ -53,11 +50,8 @@ pub fn Matrix(comptime T: type) type {
         }
 
         pub fn makeScaler(self: *Self, x: T) !void {
-            var row_i: usize = 0;
-            var col_i: usize = 0;
-            while (row_i < self.rows_n) : (row_i += 1) {
-                col_i = 0;
-                while (col_i < self.cols_n) : (col_i += 1) {
+            for (0..self.rows_n) |row_i| {
+                for (0..self.cols_n) |col_i| {
                     if (row_i == col_i) {
                         try self.set(row_i, col_i, x);
                     } else {
@@ -87,19 +81,73 @@ pub fn Matrix(comptime T: type) type {
             }
             self.elements.items[row_i * self.cols_n + col_i] = x;
         }
+
+        // pub fn getRow(self: Self, row_i: usize) MatrixError![]T {
+        //     return self.T
+        // }
     };
 }
 
-pub fn Add(comptime T: type, allocator: std.mem.Allocator, m1: Matrix(T), m2: Matrix(T)) MatrixError!Matrix(T) {
+pub fn Add(
+    comptime T: type,
+    allocator: std.mem.Allocator,
+    m1: Matrix(T),
+    m2: Matrix(T),
+) MatrixError!Matrix(T) {
     if ((m1.rows_n != m2.rows_n) or (m1.cols_n != m2.cols_n)) {
         return MatrixError.InvalidSize;
     }
     var dest = Matrix(T).init(allocator, m1.rows_n, m1.cols_n) catch return MatrixError.OutOfMemory;
-    var i: usize = 0;
-    while (i < dest.getSize()) : (i += 1) {
+    for (0..dest.getSize()) |i| {
         dest.elements.items[i] = m1.elements.items[i] + m2.elements.items[i];
     }
     return dest;
+}
+
+pub fn MultiplyElementWise(
+    comptime T: type,
+    allocator: std.mem.Allocator,
+    m1: Matrix(T),
+    m2: Matrix(T),
+) MatrixError!Matrix(T) {
+    if ((m1.rows_n != m2.rows_n) or (m1.cols_n != m2.cols_n)) {
+        return MatrixError.InvalidSize;
+    }
+    var dest = Matrix(T).init(allocator, m1.rows_n, m1.cols_n) catch return MatrixError.OutOfMemory;
+    for (0..dest.getSize()) |i| {
+        dest.elements.items[i] = m1.elements.items[i] * m2.elements.items[i];
+    }
+
+    return dest;
+}
+
+pub fn Multiply(
+    comptime T: type,
+    allocator: std.mem.Allocator,
+    m1: Matrix(T),
+    m2: Matrix(T),
+) MatrixError!Matrix(T) {
+    if ((m1.rows_n != m2.rows_n) or (m1.cols_n != m2.cols_n)) {
+        return MatrixError.InvalidSize;
+    }
+    var dest = Matrix(T).init(allocator, m1.rows_n, m1.cols_n) catch return MatrixError.OutOfMemory;
+    for (0..dest.rows_n) |row_i| {
+        for (0..dest.cols_n) |col_i| {
+            // TODO
+        }
+    }
+    return dest;
+}
+
+pub fn Trace(comptime T: type, m: Matrix(T)) MatrixError!T {
+    if (m.rows_n != m.cols_n) {
+        return MatrixError.NotSquare;
+    }
+    var trace: T = 0;
+    for (0..m.rows_n) |i| {
+        trace += try m.get(i, i);
+    }
+    return trace;
 }
 
 pub fn Determinant(comptime T: type, allocator: std.mem.Allocator, m: Matrix(T)) MatrixError!T {

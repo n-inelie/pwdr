@@ -82,9 +82,27 @@ pub fn Matrix(comptime T: type) type {
             self.elements.items[row_i * self.cols_n + col_i] = x;
         }
 
-        // pub fn getRow(self: Self, row_i: usize) MatrixError![]T {
-        //     return self.T
-        // }
+        pub fn getRow(self: Self, allocator: std.mem.Allocator, row_i: usize) MatrixError!std.ArrayList(T) {
+            if (row_i < 0 or row_i > self.rows_n - 1) {
+                return MatrixError.OutOfBounds;
+            }
+            var row = try std.ArrayList(T).init(allocator) catch return MatrixError.OutOfMemory;
+            for (0..self.cols_n) |col_i| {
+                try row.append(try self.get(row_i, col_i));
+            }
+            return row;
+        }
+
+        pub fn getCol(self: Self, allocator: std.mem.Allocator, col_i: usize) MatrixError!std.ArrayList(T) {
+            if (col_i < 0 or col_i > self.cols_n - 1) {
+                return MatrixError.OutOfBounds;
+            }
+            var col = try std.ArrayList(T).init(allocator) catch return MatrixError.OutOfMemory;
+            for (0..self.rows_n) |row_i| {
+                try col.append(try self.get(row_i, col_i));
+            }
+            return col;
+        }
     };
 }
 

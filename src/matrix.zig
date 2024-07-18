@@ -1,6 +1,12 @@
 const std = @import("std");
 const print = std.debug.print;
 
+const MatrixError = error{
+    InvalidSize,
+    NotSquare,
+    OutOfMemory,
+};
+
 pub fn Matrix(comptime T: type) type {
     return struct {
         const Self = @This();
@@ -14,7 +20,7 @@ pub fn Matrix(comptime T: type) type {
             allocator: std.mem.Allocator,
             rows_n: usize,
             cols_n: usize,
-        ) !Self {
+        ) MatrixError!Self {
             var elements = std.ArrayList(T).init(allocator);
             try elements.appendNTimes(0, rows_n * cols_n);
             return Self{
@@ -39,14 +45,14 @@ pub fn Matrix(comptime T: type) type {
                 self.elements.items[i] = x;
             }
         }
+
+        pub fn determinant(self: Self) MatrixError!void {
+            if (self.rows_n != self.cols_n) {
+                return MatrixError.NotSquare;
+            }
+        }
     };
 }
-
-const MatrixError = error{
-    InvalidSize,
-    NotSquare,
-    OutOfMemory,
-};
 
 pub fn Add(comptime T: type, allocator: std.mem.Allocator, m1: Matrix(T), m2: Matrix(T)) MatrixError!Matrix(T) {
     if ((m1.rows_n != m2.rows_n) or (m1.cols_n != m2.cols_n)) {

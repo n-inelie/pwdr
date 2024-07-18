@@ -86,7 +86,7 @@ pub fn Matrix(comptime T: type) type {
             if (row_i < 0 or row_i > self.rows_n - 1) {
                 return MatrixError.OutOfBounds;
             }
-            var row = try std.ArrayList(T).init(allocator) catch return MatrixError.OutOfMemory;
+            var row = std.ArrayList(T).init(allocator);
             for (0..self.cols_n) |col_i| {
                 try row.append(try self.get(row_i, col_i));
             }
@@ -97,7 +97,7 @@ pub fn Matrix(comptime T: type) type {
             if (col_i < 0 or col_i > self.cols_n - 1) {
                 return MatrixError.OutOfBounds;
             }
-            var col = try std.ArrayList(T).init(allocator) catch return MatrixError.OutOfMemory;
+            var col = std.ArrayList(T).init(allocator);
             for (0..self.rows_n) |row_i| {
                 try col.append(try self.get(row_i, col_i));
             }
@@ -145,13 +145,22 @@ pub fn Multiply(
     m1: Matrix(T),
     m2: Matrix(T),
 ) MatrixError!Matrix(T) {
-    if ((m1.rows_n != m2.rows_n) or (m1.cols_n != m2.cols_n)) {
+    if (m1.cols_n != m2.rows_n) {
         return MatrixError.InvalidSize;
     }
-    var dest = Matrix(T).init(allocator, m1.rows_n, m1.cols_n) catch return MatrixError.OutOfMemory;
+    var dest = Matrix(T).init(allocator, m1.rows_n, m2.cols_n) catch return MatrixError.OutOfMemory;
     for (0..dest.rows_n) |row_i| {
         for (0..dest.cols_n) |col_i| {
-            // TODO
+            const relevant_row = try m1.getRow(allocator, row_i);
+            defer relevant_row.deinit();
+            const relevant_col = try m2.getCol(allocator, col_i);
+            defer relevant_col.deinit();
+
+            var element: T = 0;
+            for (0..m1.cols_n) |i| {
+                element += relevant_row.items[i] * relevant_col.items[i];
+            }
+            try dest.set(row_i, col_i, element);
         }
     }
     return dest;

@@ -5,34 +5,26 @@ pub fn Vector(comptime T: type) type {
     return struct {
         const Self = @This();
 
-        elements: std.ArrayList(T),
+        elements: []const T,
         dimensions: usize,
 
-        pub fn init(allocator: std.mem.Allocator, args: []const T) !Self {
-            var elements = std.ArrayList(T).init(allocator);
-            for (args) |arg| {
-                try elements.append(arg);
-            }
+        pub fn Create(args: []const T) Self {
             return .{
-                .elements = elements,
-                .dimensions = elements.items.len,
+                .elements = args,
+                .dimensions = args.len,
             };
-        }
-
-        pub fn deinit(self: *Self) void {
-            self.elements.deinit();
         }
 
         pub fn magnitudeSquared(self: Self) f32 {
             var magnitude_squared: f32 = 0;
             switch (@typeInfo(T)) {
                 .Int => {
-                    for (self.elements.items) |element| {
+                    for (self.elements) |element| {
                         magnitude_squared += @floatFromInt(math.pow(T, element, 2));
                     }
                 },
                 else => {
-                    for (self.elements.items) |element| {
+                    for (self.elements) |element| {
                         magnitude_squared += @floatCast(math.pow(T, element, 2));
                     }
                 },
@@ -44,4 +36,12 @@ pub fn Vector(comptime T: type) type {
             return math.sqrt(self.magnitudeSquared());
         }
     };
+}
+
+pub inline fn Vector2f(x: f32, y: f32) Vector(f32) {
+    return Vector(f32).Create(&.{ x, y });
+}
+
+pub inline fn Vector3f(x: f32, y: f32, z: f32) Vector(f32) {
+    return Vector(f32).Create(&.{ x, y, z });
 }

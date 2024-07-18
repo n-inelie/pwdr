@@ -4,8 +4,6 @@ const matrix = @import("matrix.zig");
 const vector = @import("vector.zig");
 
 pub fn main() !void {
-    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-    defer _ = gpa.deinit();
 
     // var m1 = try matrix.Matrix(i8).init(gpa.allocator(), 3, 3);
     // defer m1.deinit();
@@ -21,7 +19,6 @@ pub fn main() !void {
     // defer m3.deinit();
     // try m3.lazyPrint();
 
-    var v1 = try vector.Vector(i8).init(gpa.allocator(), &.{ 3, 4 });
-    defer v1.deinit();
+    var v1 = vector.Vector2f(3, 4);
     print("{}, {}\n", .{ v1.magnitudeSquared(), v1.magnitude() });
 }

@@ -185,16 +185,13 @@ pub fn Determinant(comptime T: type, allocator: std.mem.Allocator, m: Matrix(T))
         return try m.get(0, 0) * try m.get(1, 1) - try m.get(0, 1) * try m.get(1, 0);
     } else {
         var determinant: T = 0;
-        var i: usize = 0;
-        while (i < m.cols_n) : (i += 1) {
+        for (0..m.cols_n) |i| {
             var cofactor_m = try Matrix(T).init(allocator, m.rows_n - 1, m.cols_n - 1);
             defer cofactor_m.deinit();
 
-            var row_i: usize = 1;
-            while (row_i < m.rows_n) : (row_i += 1) {
-                var col_i: usize = 0;
+            for (1..m.rows_n) |row_i| {
                 var cofactor_col_i: usize = 0;
-                while (col_i < m.cols_n) : (col_i += 1) {
+                for (0..m.cols_n) |col_i| {
                     if (col_i == i) {
                         continue;
                     }

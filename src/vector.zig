@@ -28,7 +28,6 @@ pub fn Vector2(comptime T: type) type {
                 .Int => m = @floatFromInt(self.magnitudeSquared()),
                 else => m = @floatCast(self.magnitudeSquared()),
             }
-
             return math.sqrt(m);
         }
     };

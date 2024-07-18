@@ -5,6 +5,7 @@ const MatrixError = error{
     InvalidSize,
     NotSquare,
     OutOfMemory,
+    OutOfBounds,
 };
 
 pub fn Matrix(comptime T: type) type {
@@ -31,19 +32,33 @@ pub fn Matrix(comptime T: type) type {
             };
         }
 
-        pub inline fn deinit(self: *Self) void {
+        pub fn deinit(self: *Self) void {
             self.elements.deinit();
         }
 
-        pub inline fn getSize(self: Self) usize {
+        pub fn getSize(self: Self) usize {
             return self.rows_n * self.cols_n;
         }
 
-        pub inline fn fill(self: *Self, x: T) void {
+        pub fn fill(self: *Self, x: T) void {
             var i: usize = 0;
             while (i < self.getSize()) : (i += 1) {
                 self.elements.items[i] = x;
             }
+        }
+
+        pub fn get(self: Self, row_i: usize, col_i: usize) MatrixError!T {
+            if (row_i < 0 or col_i < 0 or row_i > self.rows_n - 1 or col_i > self.cols_n - 1) {
+                return MatrixError.OutOfBounds;
+            }
+            return self.elements.items[row_i * self.cols_n + col_i];
+        }
+
+        pub fn set(self: *Self, row_i: usize, col_i: usize, x: T) MatrixError!void {
+            if (row_i < 0 or col_i < 0 or row_i > self.rows_n - 1 or col_i > self.cols_n - 1) {
+                return MatrixError.OutOfBounds;
+            }
+            self.elements.items[row_i * self.cols_n + col_i] = x;
         }
 
         pub fn determinant(self: Self) MatrixError!void {

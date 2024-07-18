@@ -40,6 +40,33 @@ pub fn Matrix(comptime T: type) type {
             return self.rows_n * self.cols_n;
         }
 
+        pub fn lazyPrint(self: Self) !void {
+            var row_i: usize = 0;
+            var col_i: usize = 0;
+            while (row_i < self.rows_n) : (row_i += 1) {
+                col_i = 0;
+                while (col_i < self.cols_n) : (col_i += 1) {
+                    print("{} ", .{try self.get(row_i, col_i)});
+                }
+                print("\n", .{});
+            }
+        }
+
+        pub fn makeScaler(self: *Self, x: T) !void {
+            var row_i: usize = 0;
+            var col_i: usize = 0;
+            while (row_i < self.rows_n) : (row_i += 1) {
+                col_i = 0;
+                while (col_i < self.cols_n) : (col_i += 1) {
+                    if (row_i == col_i) {
+                        try self.set(row_i, col_i, x);
+                    } else {
+                        try self.set(row_i, col_i, 0);
+                    }
+                }
+            }
+        }
+
         pub fn fill(self: *Self, x: T) void {
             var i: usize = 0;
             while (i < self.getSize()) : (i += 1) {
@@ -60,12 +87,6 @@ pub fn Matrix(comptime T: type) type {
             }
             self.elements.items[row_i * self.cols_n + col_i] = x;
         }
-
-        pub fn determinant(self: Self) MatrixError!void {
-            if (self.rows_n != self.cols_n) {
-                return MatrixError.NotSquare;
-            }
-        }
     };
 }
 
@@ -79,4 +100,39 @@ pub fn Add(comptime T: type, allocator: std.mem.Allocator, m1: Matrix(T), m2: Ma
         dest.elements.items[i] = m1.elements.items[i] + m2.elements.items[i];
     }
     return dest;
+}
+
+pub fn Determinant(comptime T: type, allocator: std.mem.Allocator, m: Matrix(T)) MatrixError!T {
+    if (m.rows_n != m.cols_n) {
+        return MatrixError.NotSquare;
+    }
+    if (m.rows_n == 2) {
+        return try m.get(0, 0) * try m.get(1, 1) - try m.get(0, 1) * try m.get(1, 0);
+    } else {
+        var determinant: T = 0;
+        var i: usize = 0;
+        while (i < m.cols_n) : (i += 1) {
+            var cofactor_m = try Matrix(T).init(allocator, m.rows_n - 1, m.cols_n - 1);
+            defer cofactor_m.deinit();
+
+            var row_i: usize = 1;
+            while (row_i < m.rows_n) : (row_i += 1) {
+                var col_i: usize = 0;
+                var cofactor_col_i: usize = 0;
+                while (col_i < m.cols_n) : (col_i += 1) {
+                    if (col_i == i) {
+                        continue;
+                    }
+                    try cofactor_m.set(row_i - 1, cofactor_col_i, try m.get(row_i, col_i));
+                    cofactor_col_i += 1;
+                }
+            }
+            if (i % 2 == 0) {
+                determinant += try m.get(0, i) * try Determinant(T, allocator, cofactor_m);
+            } else {
+                determinant -= try m.get(0, i) * try Determinant(T, allocator, cofactor_m);
+            }
+        }
+        return determinant;
+    }
 }

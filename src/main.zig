@@ -4,6 +4,8 @@ const matrix = @import("matrix.zig");
 const vector = @import("vector.zig");
 
 pub fn main() !void {
-    var v1 = vector.Vector2(f32, 3, 4);
+    const v1 = vector.Vector2(f32, 3, 4);
     print("{}, {}\n", .{ v1.magnitudeSquared(), v1.magnitude() });
+    const v2 = vector.Vector2(f32, 2, 3);
+    print("{}\n", .{vector.distance(f32, v1, v2)});
 }

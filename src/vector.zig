@@ -23,10 +23,13 @@ pub fn Vector(comptime T: type) type {
                         magnitude_squared += @floatFromInt(math.pow(T, element, 2));
                     }
                 },
-                else => {
+                .Float => {
                     for (self.elements) |element| {
                         magnitude_squared += @floatCast(math.pow(T, element, 2));
                     }
+                },
+                else => {
+                    //TODO
                 },
             }
             return magnitude_squared;
@@ -48,4 +51,28 @@ pub inline fn Vector3(comptime T: type, x: T, y: T, z: T) Vector(T) {
 
 pub inline fn Vector4(comptime T: type, x: T, y: T, z: T, w: T) Vector(T) {
     return Vector(T).Create(&.{ x, y, z, w });
+}
+
+pub fn distanceSquared(comptime T: type, v1: Vector(T), v2: Vector(T)) f32 {
+    var distance_squared: f32 = 0;
+    switch (@typeInfo(T)) {
+        .Int => {
+            for (v1.elements, v2.elements) |element1, element2| {
+                distance_squared += @floatFromInt(math.pow(T, element1 - element2, 2));
+            }
+        },
+        .Float => {
+            for (v1.elements, v2.elements) |element1, element2| {
+                distance_squared += @floatCast(math.pow(T, element1 - element2, 2));
+            }
+        },
+        else => {
+            // TODO
+        },
+    }
+    return distance_squared;
+}
+
+pub inline fn distance(comptime T: type, v1: Vector(T), v2: Vector(T)) f32 {
+    return math.sqrt(distanceSquared(T, v1, v2));
 }

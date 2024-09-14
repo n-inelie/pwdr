@@ -11,20 +11,20 @@ pub fn Vector(comptime T: type) type {
 
         allocator: std.mem.Allocator,
         dimensions: usize,
-        items: std.ArrayList(T),
+        elements: std.ArrayList(T),
 
-        pub fn init(allocator: std.mem.Allocator, items: []const T) !Self {
-            var list = try std.ArrayList(T).initCapacity(allocator, items.len);
-            try list.appendSlice(items);
+        pub fn init(allocator: std.mem.Allocator, elements: []const T) !Self {
+            var list = try std.ArrayList(T).initCapacity(allocator, elements.len);
+            try list.appendSlice(elements);
             return Self{
                 .allocator = allocator,
-                .dimensions = items.len,
-                .items = list,
+                .dimensions = elements.len,
+                .elements = list,
             };
         }
 
         pub inline fn deinit(self: *Self) void {
-            self.items.deinit();
+            self.elements.deinit();
         }
 
         pub inline fn get(self: Self, index: usize) Self.Error!T {
@@ -32,7 +32,7 @@ pub fn Vector(comptime T: type) type {
                 return Self.Error.IndexOutOfBounds;
             }
 
-            return self.items.items[index];
+            return self.elements.items[index];
         }
 
         pub inline fn print(self: Self) !void {
@@ -49,7 +49,7 @@ pub fn Vector(comptime T: type) type {
 
         pub fn magnitude_squared(self: Self) T {
             var magnitude_squared_output: T = 0;
-            for (self.items.items) |item| {
+            for (self.elements.elements) |item| {
                 magnitude_squared_output += item * item;
             }
             return magnitude_squared_output;
@@ -64,15 +64,15 @@ pub fn Vector(comptime T: type) type {
                 return Self.Error.InvalidDimensions;
             }
 
-            var add_output_items = try std.ArrayList(T).initCapacity(allocator, v1.dimensions);
+            var add_output_elements = try std.ArrayList(T).initCapacity(allocator, v1.dimensions);
             for (0..v1.dimensions) |i| {
-                add_output_items.items[i] = try v1.get(i) + try v2.get(i);
+                add_output_elements.items[i] = try v1.get(i) + try v2.get(i);
             }
 
             return Self{
-                .dimensions = v1.dimensions,
                 .allocator = allocator,
-                .items = add_output_items,
+                .dimensions = v1.dimensions,
+                .elements = add_output_elements,
             };
         }
 

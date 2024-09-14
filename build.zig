@@ -13,4 +13,12 @@ pub fn build(b: *std.Build) void {
     b
         .step("run", "Run the application")
         .dependOn(&b.addRunArtifact(exe).step);
+
+    const unit_tests = b.addTest(.{
+        .root_source_file = b.path("main.zig"),
+    });
+
+    b
+        .step("test", "Run tests")
+        .dependOn(&b.addRunArtifact(unit_tests).step);
 }
